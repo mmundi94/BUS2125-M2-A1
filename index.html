@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Business Ethics Decision Simulator | Practice Activity</title>
+<style>
+  :root {
+    --ink: #24121b;
+    --ink-2: #4a3640;
+    --muted: #7a6670;
+    --line: #eadfe3;
+    --paper: #ffffff;
+    --plum: #741b47;
+    --plum-2: #9b2a60;
+    --plum-tint: #f7e4ed;
+    --yellow: #FFFF02;
+    --econ: #1c7ed6; --econ-t: #e1efff;
+    --soc: #ae3ec9; --soc-t: #f6e5fb;
+    --env: #2f9e44; --env-t: #e1f6e5;
+    --good: #087f5b; --good-t: #d7f5ea;
+    --mid: #b35c00; --mid-t: #fff0d6; --mid-c: #f08c00;
+    --bad: #c92a2a; --bad-t: #ffe3e3;
+    --gray-t: #f1edef;
+    --r-xl: 24px; --r-lg: 18px; --r-md: 13px;
+    --shadow: 0 1px 2px rgba(36,18,27,.06), 0 12px 30px rgba(116,27,71,.10);
+    --shadow-hi: 0 3px 8px rgba(36,18,27,.10), 0 20px 40px rgba(116,27,71,.18);
+    --slab: "Rockwell", "Roboto Slab", "Cambria", Georgia, serif;
+    --sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--sans); font-size: 16px; line-height: 1.55; color: var(--ink);
+    background-color: #fff3ea;
+    background-image:
+      radial-gradient(44rem 30rem at -6% -8%, rgba(116,27,71,.38), transparent 62%),
+      radial-gradient(42rem 30rem at 106% 4%, rgba(255,140,105,.60), transparent 60%),
+      radial-gradient(46rem 30rem at 104% 96%, rgba(255,205,60,.58), transparent 62%),
+      radial-gradient(42rem 30rem at -6% 100%, rgba(174,62,201,.34), transparent 60%);
+    min-height: 100vh; overflow-x: hidden; position: relative;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: .3;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .wrap { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 18px 16px 44px; }
+  h1, h2, h3, h4 { margin: 0; line-height: 1.18; }
+  h1:focus, h2:focus, h3:focus { outline: none; }
+  p { margin: 0; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+  .slab { font-family: var(--slab); }
+
+  /* Header */
+  .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+  .uni b { display: block; font-family: var(--slab); font-size: 17px; }
+  .uni span { font-size: 12.5px; color: var(--ink-2); font-weight: 600; }
+  .pa { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px 7px 7px; border-radius: 10px; background: var(--plum); color: #fff; font-weight: 800; font-size: 13px; box-shadow: var(--shadow); }
+  .pa i { width: 20px; height: 20px; border-radius: 6px; background: var(--yellow); display: grid; place-items: center; color: var(--plum); font-style: normal; }
+  .pa i svg { width: 13px; height: 13px; }
+
+  /* Case deck progress */
+  .deck { display: grid; grid-template-columns: .8fr repeat(4, 1fr) .9fr; gap: 8px; margin-bottom: 16px; list-style: none; padding: 0; }
+  .dk { background: rgba(255,255,255,.75); border-radius: var(--r-md); padding: 9px 10px; display: flex; align-items: center; gap: 8px; border: 2px solid transparent; min-width: 0; backdrop-filter: blur(5px); }
+  .dk .di { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; background: #eee4e9; color: var(--muted); flex-shrink: 0; }
+  .dk .di svg { width: 16px; height: 16px; }
+  .dk small { display: block; font-size: 10.5px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+  .dk b { display: block; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dk > span:last-child { min-width: 0; }
+  .dk.now { background: #fff; border-color: var(--plum); box-shadow: var(--shadow); }
+  .dk.now .di { background: var(--plum); color: var(--yellow); }
+  .dk.done .di { background: var(--good-t); color: var(--good); }
+
+  /* Common */
+  .card { background: var(--paper); border-radius: var(--r-xl); box-shadow: var(--shadow); padding: 24px; }
+  .stack { display: flex; flex-direction: column; gap: 16px; }
+  .eyebrow { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--plum); }
+  .hint { font-size: 13.5px; color: var(--muted); }
+  .row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .hl { background: linear-gradient(transparent 55%, var(--yellow) 55%, var(--yellow) 90%, transparent 90%); padding: 0 3px; }
+
+  /* Band */
+  .band { position: relative; overflow: hidden; border-radius: var(--r-xl); color: #fff; box-shadow: var(--shadow);
+    background: radial-gradient(26rem 18rem at 95% 0%, rgba(255,140,105,.85), transparent 60%), radial-gradient(22rem 16rem at 0% 110%, rgba(174,62,201,.75), transparent 60%), linear-gradient(125deg, #4d0f2e 0%, #741b47 50%, #9b2a60 100%); }
+  .band::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .4; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.05' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23b)'/%3E%3C/svg%3E"); }
+  .band > * { position: relative; z-index: 1; }
+  .hero { padding: 34px 30px; }
+  .hero .eb { font-size: 12.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; opacity: .92; }
+  .hero h1 { font-family: var(--slab); font-size: clamp(30px, 5vw, 46px); margin: 10px 0 10px; }
+  .hero .mark { color: var(--plum); background: var(--yellow); padding: 0 8px; border-radius: 6px; }
+  .hero p { max-width: 640px; font-size: 16.5px; opacity: .96; }
+
+  .intro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .co { display: flex; align-items: center; gap: 12px; margin: 6px 0 12px; }
+  .co .logo { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; background: var(--plum); color: var(--yellow); }
+  .co .logo svg { width: 26px; height: 26px; }
+  .co b { font-family: var(--slab); font-size: 26px; display: block; line-height: 1.1; }
+  .co small { color: var(--muted); font-size: 13px; }
+  .role { margin-top: 12px; padding: 12px 14px; border-radius: var(--r-md); background: var(--plum-tint); font-size: 14.5px; }
+  .role b { color: var(--plum); }
+  .preview { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .pv { border-radius: var(--r-md); padding: 12px; background: #faf6f8; border: 1.5px solid var(--line); display: flex; gap: 10px; align-items: flex-start; }
+  .pv .pi { width: 34px; height: 34px; border-radius: 10px; background: var(--plum); color: #fff; display: grid; place-items: center; flex-shrink: 0; }
+  .pv .pi svg { width: 19px; height: 19px; }
+  .pv b { display: block; font-size: 14px; }
+  .pv span { font-size: 12.5px; color: var(--muted); }
+  .qs { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 7px; counter-reset: q; }
+  .qs li { counter-increment: q; display: grid; grid-template-columns: 26px 1fr; gap: 10px; font-size: 14.5px; align-items: start; }
+  .qs li::before { content: counter(q); width: 26px; height: 26px; border-radius: 50%; background: var(--yellow); color: var(--plum); font-weight: 800; font-size: 12.5px; display: grid; place-items: center; border: 2px solid var(--plum); }
+  .dims-legend { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .dl { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 800; padding: 5px 10px; border-radius: 999px; }
+  .dl svg { width: 14px; height: 14px; }
+
+  /* Buttons */
+  .btn { appearance: none; border: 0; font: inherit; font-weight: 800; font-size: 15px; cursor: pointer; display: inline-flex; align-items: stretch; border-radius: 12px; overflow: hidden; padding: 0; min-height: 48px; transition: transform .15s ease, box-shadow .15s ease; }
+  .btn .bt { display: flex; align-items: center; padding: 0 18px; }
+  .btn .bx { display: grid; place-items: center; width: 48px; }
+  .btn .bx svg { width: 18px; height: 18px; }
+  .btn-main { background: var(--plum); color: #fff; box-shadow: 0 10px 20px rgba(116,27,71,.3); }
+  .btn-main .bx { background: var(--yellow); color: var(--plum); }
+  .btn-main:hover:not(:disabled) { transform: translateY(-1px); }
+  .btn-main:disabled { background: #cbbec4; box-shadow: none; cursor: not-allowed; }
+  .btn-main:disabled .bx { background: #e6dde1; color: #9c8f95; }
+  .btn-ghost { background: #fff; color: var(--plum); border: 2px solid var(--plum); }
+  .btn-ghost .bx { background: var(--plum-tint); }
+  :focus-visible { outline: 3px solid var(--econ); outline-offset: 3px; }
+
+  /* Case header */
+  .case-band { padding: 24px 26px; }
+  .case-band .tagline { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .chipw { font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,.18); }
+  .case-band h2 { font-family: var(--slab); font-size: clamp(25px, 3.6vw, 34px); margin: 10px 0 14px; }
+  .objective { display: inline-flex; gap: 10px; align-items: flex-start; background: #fff; color: var(--ink); border-radius: var(--r-md); padding: 12px 14px; max-width: 720px; }
+  .objective .oi { width: 30px; height: 30px; border-radius: 9px; background: var(--yellow); color: var(--plum); display: grid; place-items: center; flex-shrink: 0; }
+  .objective .oi svg { width: 17px; height: 17px; }
+  .objective small { display: block; font-size: 11px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+  .objective b { font-size: 15px; }
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 16px; }
+  .st { font-size: 12px; font-weight: 800; text-align: center; padding: 7px 4px; border-radius: 9px; background: rgba(255,255,255,.14); color: rgba(255,255,255,.8); }
+  .st.on { background: var(--yellow); color: var(--plum); }
+  .st.ok { background: rgba(255,255,255,.92); color: var(--good); }
+
+  /* Briefing sheet */
+  .sheet { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+  .sf { border-radius: var(--r-md); padding: 14px; background: #faf6f8; border-left: 4px solid var(--plum); }
+  .sf.wide { grid-column: 1 / -1; background: #fff; border: 1.5px solid var(--line); border-left: 4px solid var(--plum); }
+  .sf h4 { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--plum); margin-bottom: 5px; }
+  .sf h4 svg { width: 15px; height: 15px; }
+  .sf p { font-size: 14.5px; }
+  .sf.wide p { font-size: 15.5px; }
+  .shchips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .shc { font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: #fff; border: 1.5px solid var(--line); }
+  .horizon { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .hz { border-radius: 10px; padding: 8px 10px; background: #fff; font-size: 13.5px; }
+  .hz b { display: block; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+
+  /* Options */
+  .qline { font-family: var(--slab); font-size: 22px; margin-bottom: 4px; }
+  .opts { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; margin-top: 14px; }
+  .opt { appearance: none; font: inherit; color: inherit; text-align: left; cursor: pointer; background: #fff; border: 2px solid var(--line); border-radius: var(--r-lg); padding: 16px; display: flex; flex-direction: column; gap: 8px; position: relative; transition: all .15s ease; }
+  .opt:hover:not(:disabled) { border-color: #d4a7bd; box-shadow: var(--shadow-hi); transform: translateY(-2px); }
+  .opt .ol { display: flex; align-items: center; gap: 8px; }
+  .opt .ol span { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: var(--plum-tint); color: var(--plum); font-family: var(--slab); font-weight: 700; }
+  .opt h4 { font-size: 16.5px; padding-right: 28px; }
+  .opt p { font-size: 14px; color: var(--ink-2); }
+  .opt .to { margin-top: auto; font-size: 13px; padding: 8px 10px; border-radius: 10px; background: #faf3d0; color: #5a4a00; display: flex; gap: 6px; align-items: flex-start; }
+  .opt .to svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 2px; }
+  .opt .radio { position: absolute; top: 16px; right: 16px; width: 22px; height: 22px; border-radius: 50%; border: 2px solid #cdbcc4; display: grid; place-items: center; }
+  .opt[aria-checked="true"] { border-color: var(--plum); box-shadow: 0 0 0 4px rgba(116,27,71,.14); }
+  .opt[aria-checked="true"] .ol span { background: var(--plum); color: var(--yellow); }
+  .opt[aria-checked="true"] .radio { border-color: var(--plum); background: var(--plum); }
+  .opt[aria-checked="true"] .radio::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); }
+  .opts.locked .opt { cursor: default; }
+  .opts.locked .opt:not(.picked) { opacity: .62; }
+  .opts.locked .opt.picked { box-shadow: none; }
+  .tierflag { display: none; position: absolute; top: -11px; left: 16px; font-size: 11.5px; font-weight: 800; padding: 3px 10px; border-radius: 999px; }
+  .opts.locked .opt .tierflag { display: inline-block; }
+  .tf-best { background: var(--good); color: #fff; }
+  .tf-partial { background: var(--mid-c); color: #2b1600; }
+  .tf-weak { background: var(--bad); color: #fff; }
+
+  /* Report */
+  .report { border-radius: var(--r-xl); background: #fff; box-shadow: var(--shadow); overflow: hidden; animation: rise .35s ease; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .rp-top { padding: 20px 24px; display: grid; grid-template-columns: 50px 1fr; gap: 14px; align-items: center; color: #fff; }
+  .rp-top .ri { width: 50px; height: 50px; border-radius: 14px; background: rgba(255,255,255,.2); display: grid; place-items: center; }
+  .rp-top .ri svg { width: 26px; height: 26px; }
+  .rp-top small { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; opacity: .95; }
+  .rp-top h3 { font-family: var(--slab); font-size: 21px; margin-top: 3px; }
+  .rp-best { background: linear-gradient(120deg, #065f45, #087f5b 55%, #20a77a); }
+  .rp-partial { background: linear-gradient(120deg, #8a4300, #b35c00 55%, #e07a10); }
+  .rp-weak { background: linear-gradient(120deg, #8f1d1d, #c92a2a 55%, #e8554f); }
+  .rp-body { padding: 20px 24px 24px; display: grid; gap: 16px; }
+  .sec h4 { font-size: 12px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .sec h4 svg { width: 15px; height: 15px; color: var(--plum); }
+  .sec > p { font-size: 15px; }
+  .dims { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; }
+  .dim { border-radius: var(--r-md); padding: 12px; background: var(--dt); }
+  .dim .dh { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; }
+  .dim .dh span { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; background: var(--dc); color: #fff; }
+  .dim .dh span svg { width: 15px; height: 15px; }
+  .dim .dh b { font-size: 13.5px; color: var(--dc); }
+  .rate { margin-left: auto; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #fff; }
+  .r-Positive { color: var(--good); } .r-Mixed { color: var(--mid); } .r-Negative { color: var(--bad); } .r-Minimal { color: var(--muted); }
+  .dim p { font-size: 13.5px; }
+  .who { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .wcol { border-radius: var(--r-md); padding: 12px; }
+  .wcol b { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; margin-bottom: 8px; }
+  .wcol b svg { width: 15px; height: 15px; }
+  .w-ben { background: var(--good-t); } .w-ben b { color: var(--good); }
+  .w-risk { background: var(--bad-t); } .w-risk b { color: var(--bad); }
+  .wcol .shc { background: #fff; border-color: transparent; }
+  .timeline { display: grid; grid-template-columns: 1fr 40px 1fr; align-items: stretch; }
+  .tl { border-radius: var(--r-md); padding: 12px; background: #faf6f8; }
+  .tl b { display: block; font-size: 11.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--plum); margin-bottom: 3px; }
+  .tl p { font-size: 14px; }
+  .tl-arrow { display: grid; place-items: center; color: var(--plum); }
+  .tl-arrow svg { width: 20px; height: 20px; }
+  .legal { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: var(--r-md); background: #f2f0ff; }
+  .legal svg { width: 20px; height: 20px; color: #4c3fb0; flex-shrink: 0; margin-top: 1px; }
+  .legal p { font-size: 14.5px; }
+  .legal b { color: #4c3fb0; }
+  .best-note { font-size: 14.5px; padding: 12px 14px; border-radius: var(--r-md); background: var(--good-t); }
+  .best-note b { color: var(--good); }
+  details.compare { border: 1.5px solid var(--line); border-radius: var(--r-md); padding: 0 14px; }
+  details.compare summary { cursor: pointer; font-weight: 800; font-size: 14px; padding: 12px 0; color: var(--plum); list-style: none; display: flex; align-items: center; gap: 8px; }
+  details.compare summary::-webkit-details-marker { display: none; }
+  details.compare summary svg { width: 16px; height: 16px; transition: transform .2s ease; }
+  details.compare[open] summary svg { transform: rotate(90deg); }
+  .cmp { display: grid; gap: 8px; padding-bottom: 14px; }
+  .cmp div { font-size: 14px; padding: 10px 12px; border-radius: 10px; background: #faf6f8; }
+  .cmp em { font-style: normal; font-size: 11.5px; font-weight: 800; padding: 2px 8px; border-radius: 999px; margin-left: 6px; }
+
+  /* Checks */
+  .check-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .check-head span { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; background: var(--yellow); color: var(--plum); border: 2px solid var(--plum); }
+  .check-head span svg { width: 19px; height: 19px; }
+  .proposal { margin: 10px 0 14px; padding: 12px 14px; border-radius: var(--r-md); background: #faf6f8; border: 1.5px dashed #d8b9c8; font-size: 15px; }
+  .proposal b { color: var(--plum); }
+  .sk-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+  .sk { appearance: none; font: inherit; color: inherit; cursor: pointer; display: flex; align-items: center; gap: 10px; text-align: left; padding: 12px 14px; border-radius: var(--r-md); border: 2px solid var(--line); background: #fff; font-weight: 700; font-size: 15px; transition: all .15s ease; }
+  .sk .ski { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--plum-tint); color: var(--plum); flex-shrink: 0; }
+  .sk .ski svg { width: 17px; height: 17px; }
+  .sk:hover:not(:disabled) { border-color: #d4a7bd; transform: translateY(-1px); }
+  .sk[aria-checked="true"] { border-color: var(--plum); background: var(--plum-tint); }
+  .sk[aria-checked="true"] .ski { background: var(--plum); color: var(--yellow); }
+  .matrix { display: grid; grid-template-columns: 34px 1fr 1fr; grid-template-rows: auto 1fr 1fr; gap: 8px; }
+  .ax { font-size: 11.5px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); display: grid; place-items: center; }
+  .ax.v { writing-mode: vertical-rl; transform: rotate(180deg); }
+  .q { appearance: none; font: inherit; color: inherit; cursor: pointer; text-align: left; min-height: 96px; padding: 14px; border-radius: var(--r-md); border: 2px solid var(--line); background: #fff; display: flex; flex-direction: column; gap: 4px; transition: all .15s ease; position: relative; }
+  .q b { font-size: 15.5px; font-family: var(--slab); }
+  .q span { font-size: 12.5px; color: var(--muted); }
+  .q:hover:not(:disabled) { border-color: #d4a7bd; transform: translateY(-1px); box-shadow: var(--shadow); }
+  .q[aria-checked="true"] { border-color: var(--plum); background: var(--plum-tint); box-shadow: 0 0 0 4px rgba(116,27,71,.12); }
+  .is-right { border-color: var(--good) !important; background: var(--good-t) !important; opacity: 1 !important; }
+  .is-wrong { border-color: var(--bad) !important; background: var(--bad-t) !important; }
+  .locked-set .q:not(.is-right):not(.is-wrong), .locked-set .sk:not(.is-right):not(.is-wrong) { opacity: .5; }
+  .locked-set button { cursor: default; }
+  .cfb { margin-top: 14px; padding: 14px 16px; border-radius: var(--r-md); animation: rise .3s ease; }
+  .cfb.y { background: var(--good-t); } .cfb.n { background: var(--bad-t); }
+  .cfb b { display: flex; align-items: center; gap: 6px; font-size: 13px; letter-spacing: .05em; text-transform: uppercase; margin-bottom: 4px; }
+  .cfb b svg { width: 16px; height: 16px; }
+  .cfb.y b { color: var(--good); } .cfb.n b { color: var(--bad); }
+  .cfb p { font-size: 14.5px; }
+
+  /* Results */
+  .perf { display: grid; gap: 10px; }
+  .pf { display: grid; grid-template-columns: 1fr auto auto; gap: 14px; align-items: center; padding: 12px 14px; border-radius: var(--r-md); background: #faf6f8; }
+  .pf b { font-size: 15px; }
+  .dots { display: flex; gap: 5px; }
+  .dot { width: 14px; height: 14px; border-radius: 4px; background: #e6dbe0; transform: rotate(45deg); }
+  .dot.on { background: var(--plum); }
+  .pfs { font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+  .pfs.y { background: var(--good-t); color: var(--good); } .pfs.n { background: var(--mid-t); color: var(--mid); }
+  .twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .lst { border-radius: var(--r-lg); padding: 18px; }
+  .lst h3 { display: flex; align-items: center; gap: 8px; font-family: var(--slab); font-size: 18px; margin-bottom: 10px; }
+  .lst h3 svg { width: 20px; height: 20px; }
+  .lst ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+  .lst li { font-size: 14.5px; padding: 10px 12px; border-radius: 10px; background: #fff; }
+  .lst li b { display: block; font-size: 14px; }
+  .l-good { background: var(--good-t); } .l-good h3 { color: var(--good); }
+  .l-rev { background: var(--mid-t); } .l-rev h3 { color: var(--mid); }
+  .rec { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; }
+  .rc { border-radius: var(--r-md); padding: 12px; background: #faf6f8; }
+  .rc small { font-size: 11px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+  .rc b { display: block; font-size: 14px; margin: 3px 0 6px; }
+  .rc em { font-style: normal; font-size: 11.5px; font-weight: 800; padding: 2px 8px; border-radius: 999px; }
+  .e-best { background: var(--good-t); color: var(--good); } .e-partial { background: var(--mid-t); color: var(--mid); } .e-weak { background: var(--bad-t); color: var(--bad); }
+
+  .foot { text-align: center; font-size: 12.5px; color: var(--ink-2); margin-top: 22px; }
+
+  @media (max-width: 960px) {
+    .opts { grid-template-columns: minmax(0,1fr); }
+    .deck { grid-template-columns: repeat(6, minmax(0,1fr)); }
+    .dk { flex-direction: column; text-align: center; padding: 8px 4px; gap: 4px; }
+    .dk b { display: none; }
+    .dk.now b { display: block; font-size: 11px; white-space: normal; }
+    .rec { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 720px) {
+    .intro-grid, .sheet, .dims, .who, .twocol, .preview, .sk-grid { grid-template-columns: minmax(0,1fr); }
+    .timeline { grid-template-columns: minmax(0,1fr); }
+    .tl-arrow { height: 30px; transform: rotate(90deg); }
+    .card { padding: 18px; }
+    .hero, .case-band { padding: 24px 18px; }
+    .rp-top, .rp-body { padding-left: 18px; padding-right: 18px; }
+    .row .btn { width: 100%; }
+    .row .btn .bt { flex: 1; justify-content: center; }
+    .steps { grid-template-columns: repeat(2, 1fr); }
+    .matrix { grid-template-columns: 26px 1fr 1fr; }
+    .q { min-height: 84px; padding: 10px; }
+    .q b { font-size: 14px; }
+    .dk small { font-size: 9px; }
+    .pf { grid-template-columns: 1fr; gap: 6px; }
+  }
+  @media (max-width: 460px) { .rec { grid-template-columns: 1fr; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="uni"><b>Nexford University</b><span>BUS2125 The World of Business &middot; Section 2: Ethics and Business Responsibility</span></div>
+    <span class="pa"><i aria-hidden="true" id="paIcon"></i>Practice Activity</span>
+  </header>
+  <nav aria-label="Activity progress"><ol class="deck" id="deck"></ol></nav>
+  <main id="app"></main>
+  <p class="sr" id="live" aria-live="polite"></p>
+  <p class="foot">Practice Activity &middot; Ungraded &middot; Nexford University</p>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ============ Solid icons ============ */
+  var W = 'fill="#fff" fill-opacity=".45"';
+  var P = {
+    kettle: '<path d="M6 9h11l1.2 10.5A1.5 1.5 0 0 1 16.7 21H6.3a1.5 1.5 0 0 1-1.5-1.5z"/><path d="M8.5 5.5h6a1 1 0 0 1 1 1V9h-8V6.5a1 1 0 0 1 1-1z"/><path d="M18 11h1.5a2.5 2.5 0 0 1 0 5H18.5l-.3-2h1.3a.5.5 0 0 0 0-1h-1.7z"/>',
+    factory: '<path d="M2.5 21V10.5l5 3v-3l5 3v-3l4 2.4V3.5h3l1 1V21z"/><rect x="5" y="16.5" width="2.5" height="2" ' + W + '/><rect x="10" y="16.5" width="2.5" height="2" ' + W + '/><rect x="15" y="16.5" width="2.5" height="2" ' + W + '/>',
+    blender: '<path d="M6.5 3h11l-1.6 11.5H8.1z"/><rect x="6" y="15.5" width="12" height="6" rx="2"/><circle cx="12" cy="18.5" r="1.4" ' + W + '/><rect x="9" y="5.5" width="1.6" height="6" rx=".8" ' + W + '/>',
+    bin: '<rect x="4" y="5" width="16" height="2.2" rx="1"/><rect x="9" y="2.5" width="6" height="2" rx="1"/><path d="M5.5 8.5h13l-1.2 11.8a1 1 0 0 1-1 .9H7.7a1 1 0 0 1-1-.9z"/><rect x="9" y="11" width="1.6" height="7" rx=".8" ' + W + '/><rect x="13.4" y="11" width="1.6" height="7" rx=".8" ' + W + '/>',
+    stamp: '<path d="M9.5 2.5h5a1 1 0 0 1 1 1v4.5l2.5 3V14H6v-3l2.5-3V3.5a1 1 0 0 1 1-1z"/><rect x="4" y="15.2" width="16" height="3.3" rx="1"/><rect x="6" y="19.5" width="12" height="2" rx="1"/>',
+    flag: '<rect x="4" y="2.5" width="2" height="19" rx="1"/><path d="M6.5 3.5h12.5l-3 4.5 3 4.5H6.5z"/>',
+    people: '<circle cx="8.5" cy="7.5" r="3.5"/><circle cx="16.5" cy="8.5" r="2.8"/><path d="M2 20.5a6.5 6.5 0 0 1 13 0z"/><path d="M14.5 20.5a7.8 7.8 0 0 0-2.2-5.2 5.3 5.3 0 0 1 9.7 3.2v2z"/>',
+    person: '<circle cx="12" cy="7.5" r="4"/><path d="M4 21a8 8 0 0 1 16 0z"/>',
+    coin: '<circle cx="12" cy="12" r="9.5"/><circle cx="12" cy="12" r="6" ' + W + '/><rect x="11" y="8" width="2" height="8" rx="1"/>',
+    leaf: '<path d="M20.5 3.5C10 3.5 4 8.5 4 15.5c0 1.6.3 3 .9 4.2C6.3 14 10.5 10.3 15.8 8c-4.3 3.2-7.4 7.2-8.8 12.6 1.4.4 2.8.5 4 .5 6.5 0 9.5-6 9.5-17.6z"/>',
+    scale: '<rect x="11" y="3" width="2" height="15.5" rx="1"/><rect x="6.5" y="18.5" width="11" height="2.5" rx="1.2"/><rect x="3.5" y="5.5" width="17" height="2" rx="1"/><path d="M2.5 13.5L5.5 8l3 5.5a3 3 0 0 1-6 0z"/><path d="M15.5 13.5l3-5.5 3 5.5a3 3 0 0 1-6 0z"/>',
+    hourglass: '<path d="M6 2h12v2.5c0 2.5-2.2 4.8-4.3 7.5 2.1 2.7 4.3 5 4.3 7.5V22H6v-2.5c0-2.5 2.2-4.8 4.3-7.5C8.2 9.3 6 7 6 4.5z"/><path d="M9 19.5c0-1.3 1.4-2.6 3-4.1 1.6 1.5 3 2.8 3 4.1z" ' + W + '/>',
+    alert: '<path d="M12 2.5l10.5 18.5h-21z"/><rect x="11" y="9" width="2" height="6.5" rx="1" fill="#fff"/><circle cx="12" cy="18" r="1.2" fill="#fff"/>',
+    eye: '<path d="M12 5C6.5 5 2.7 9.3 1.5 12c1.2 2.7 5 7 10.5 7s9.3-4.3 10.5-7C21.3 9.3 17.5 5 12 5z"/><circle cx="12" cy="12" r="3.5" fill="#fff"/><circle cx="12" cy="12" r="1.6"/>',
+    star: '<path d="M12 2l2.9 6.9 7.1.9-5.4 4.8 1.6 7.4-6.2-3.7-6.2 3.7 1.6-7.4L2 9.8l7.1-.9z"/>',
+    book: '<path d="M3 4.5h6.5A2.5 2.5 0 0 1 12 7v13.5a2 2 0 0 0-2-2H3z"/><path d="M21 4.5h-6.5A2.5 2.5 0 0 0 12 7v13.5a2 2 0 0 1 2-2h7z" fill-opacity=".6"/>',
+    check: '<path d="M9.5 18.2L3.6 12.3l1.9-1.9 4 4 9-9 1.9 1.9z"/>',
+    cross: '<path d="M6.3 4.9L12 10.6l5.7-5.7 1.4 1.4-5.7 5.7 5.7 5.7-1.4 1.4-5.7-5.7-5.7 5.7-1.4-1.4 5.7-5.7-5.7-5.7z"/>',
+    half: '<path d="M12 2.5a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0-19zm0 2v15a7.5 7.5 0 0 1 0-15z"/>',
+    arrow: '<path d="M3.5 11h13.1l-5.3-5.3L12.7 4.3 20.4 12l-7.7 7.7-1.4-1.4 5.3-5.3H3.5z"/>',
+    chev: '<path d="M8.6 5.4L10 4l8 8-8 8-1.4-1.4 6.6-6.6z"/>',
+    restart: '<path d="M12 3.5V1L7 5l5 4V6a6 6 0 1 1-6 6H3.5a8.5 8.5 0 1 0 8.5-8.5z"/>',
+    diamond: '<path d="M12 2l10 10-10 10L2 12z"/>'
+  };
+  function ic(n) { return '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">' + P[n] + '</svg>'; }
+  document.getElementById("paIcon").innerHTML = ic("diamond");
+
+  var DIMS = { econ: ["Economic", "coin", "var(--econ)", "var(--econ-t)"], soc: ["Social", "people", "var(--soc)", "var(--soc-t)"], env: ["Environmental", "leaf", "var(--env)", "var(--env-t)"] };
+  var TIER = {
+    best: { label: "Balanced decision", flag: "Strongest option", icon: "check" },
+    partial: { label: "Partly balanced", flag: "Partly balanced", icon: "half" },
+    weak: { label: "High-risk decision", flag: "High risk", icon: "alert" }
+  };
+  var CLASSES = {
+    LE: ["Legal and Ethical", "Follows the law and meets ethical standards"],
+    LU: ["Legal but Unethical", "Permitted by law, but raises ethical concerns"],
+    IS: ["Illegal but Socially Accepted", "Breaks the law, though tolerated locally"],
+    IU: ["Illegal and Unethical", "Breaks the law and ethical standards"]
+  };
+
+  /* ============ Scenarios ============ */
+  var CASES = [
+    {
+      title: "The Lower-Cost Supplier", short: "Supplier", tag: "Supplier decision", icon: "factory",
+      objective: "Lower the production cost of the Arc kettle by 8% so Copperline keeps its largest retail contract.",
+      situation: "Copperline has bought kettle heating elements from Dayton Metalworks, an Ohio supplier, for nine years. A new overseas supplier offers the same part for 12% less. Your sourcing team visited its factory and found no violations of local law, but workers regularly work 70-hour weeks in peak season and safety training records are incomplete.",
+      stakeholders: ["Copperline owners", "Retail partner", "Dayton Metalworks and its employees", "Overseas factory workers", "Customers"],
+      pressure: "The retail partner wants a lower price by the third quarter or it will cut Copperline's shelf space.",
+      concern: "Copperline's supplier code of conduct asks suppliers to provide safe conditions and reasonable working hours.",
+      legal: "Buying from the new supplier is legal, and its practices meet local law.",
+      hShort: "Fastest path to the cost target.", hLong: "A supplier's practices become part of Copperline's own record.",
+      options: [
+        { title: "Switch fully now", text: "Move all heating-element orders to the new supplier this quarter and review working conditions at next year's audit.", trade: "Hits the full cost target, but accepts current conditions for a year.",
+          tier: "weak", f: { c: 0, b: 0, t: 0 },
+          head: "Copperline meets the cost target, but its savings now depend on conditions its own code says are unacceptable.",
+          eth: "The purchase is legal, yet it conflicts with Copperline's supplier standards. Legal compliance alone does not make the decision responsible.",
+          ben: ["Copperline owners", "Retail partner"], risk: ["Overseas factory workers", "Dayton Metalworks and its employees"],
+          econ: ["Positive", "Full savings, and the retail contract is protected."], soc: ["Negative", "Long hours and weak safety training continue, and the Ohio supplier loses its contract."], env: ["Minimal", "Longer shipping adds some transport emissions."],
+          lg: "Legal under the supplier's local law.", s: "Cost target met on time.", l: "If conditions become public, customers and the retailer may question Copperline's standards." },
+        { title: "Stay with Dayton", text: "Keep all orders with Dayton Metalworks, absorb the cost by cutting next year's product development budget, and tell the retailer the price cannot drop yet.", trade: "Protects a reliable partner, but risks the retail contract and future products.",
+          tier: "partial", f: { c: 1, b: 0, t: 0 },
+          head: "Copperline keeps a dependable supplier, but the retailer begins reducing its shelf space.",
+          eth: "This avoids the labor concern, but it shifts the cost onto Copperline's future products and puts the jobs tied to the retail contract at risk.",
+          ben: ["Dayton Metalworks and its employees"], risk: ["Copperline owners", "Copperline employees", "Retail partner"],
+          econ: ["Negative", "Lost shelf space and a smaller development budget weaken future sales."], soc: ["Positive", "No added labor risk, and the Ohio relationship continues."], env: ["Minimal", "Little change."],
+          lg: "Legal. Neither supplier relationship raises a legal issue.", s: "No change in conditions, but tension with the retailer.", l: "Fewer new products could weaken Copperline's position over time." },
+        { title: "Conditional split", text: "Move 40% of orders to the new supplier only if it limits hours and completes safety training within six months, verified by follow-up visits. Keep 60% with Dayton and negotiate a smaller price cut.", trade: "Reaches only part of the cost target and adds audit costs.",
+          tier: "best", f: { c: 1, b: 1, t: 1 },
+          head: "Copperline reaches about half of the cost target, keeps the retailer at the table, and uses its purchasing power to improve conditions.",
+          eth: "Copperline applies its own supplier standards instead of setting them aside, while still responding to real cost pressure.",
+          ben: ["Overseas factory workers", "Retail partner", "Dayton Metalworks (keeps most work)"], risk: ["Copperline owners (smaller savings)", "Dayton Metalworks (lower volume)"],
+          econ: ["Mixed", "Smaller savings and audit costs, but the contract is likely kept."], soc: ["Positive", "Conditions improve under clear deadlines, and Dayton keeps most of its work."], env: ["Minimal", "Some added shipping for part of the volume."],
+          lg: "Legal. The added conditions come from Copperline's own code.", s: "A harder negotiation and less savings now.", l: "A supply base that meets Copperline's standards and is easier to defend." }
+      ],
+      check: { type: "stake",
+        proposal: "<b>Proposed decision: switch fully now.</b> Copperline's owners and the retail partner receive most of the benefit.",
+        q: "Which stakeholder carries the greatest risk from this decision?",
+        opts: ["Copperline's customers", "The overseas factory workers", "The retail partner", "Copperline's owners"], answer: 1,
+        fb: "The factory workers face long hours and incomplete safety training, a risk to their health and safety that they did not choose. Dayton Metalworks would also lose its contract, but it does not face the same risk of harm." }
+    },
+    {
+      title: "The Cracking Lid", short: "Product", tag: "Customer product issue", icon: "blender",
+      objective: "Protect holiday sales of the new Pulse blender, Copperline's best-selling launch this year.",
+      situation: "About 2% of returned Pulse blenders show a hairline crack in the lid after several months of use. One customer reported a small cut from a sharp edge. Engineers will have a stronger lid ready in 10 weeks, and 48,000 units are already in stores and warehouses.",
+      stakeholders: ["Customers", "Retail partners", "Copperline owners", "Customer service employees"],
+      pressure: "Retailers want full shelves for the holidays, and sending new lids for existing stock would cost about $300,000.",
+      concern: "Customers could be injured, and they cannot see the risk when they buy.",
+      legal: "The blender meets current federal safety standards. A recall is not legally required at this point.",
+      hShort: "Holiday sales and retailer relationships.", hLong: "Customer safety, trust, and returns over the product's life.",
+      options: [
+        { title: "Notify and replace", text: "Keep selling, publicly notify buyers, offer a free replacement lid to every owner, and switch production to the new lid as soon as it is ready.", trade: "Costs about $300,000 and may draw some negative attention this season.",
+          tier: "best", f: { c: 1, b: 1, t: 1 },
+          head: "Copperline takes on a cost and some short-term attention, but owners can protect themselves and trust is preserved.",
+          eth: "Copperline goes beyond what the law requires because its customers carry the risk. The decision is easy to explain to every affected stakeholder.",
+          ben: ["Customers", "Retail partners (long term)"], risk: ["Copperline owners (replacement cost)"],
+          econ: ["Mixed", "About $300,000 in lids and shipping, but holiday sales continue."], soc: ["Positive", "Every owner is informed and protected."], env: ["Mixed", "Old lids become waste unless Copperline offers a mail-back option to recycle them."],
+          lg: "Legal, and more than current law requires.", s: "Replacement costs and some negative attention.", l: "Stronger customer trust and fewer future injuries and returns." },
+        { title: "Sell and fix quietly", text: "Keep selling current stock and send a free replacement lid to any customer who contacts Copperline, without a public notice.", trade: "Protects holiday sales, but most owners never learn about the issue.",
+          tier: "weak", f: { c: 0, b: 0, t: 0 },
+          head: "Holiday sales hold up, but most owners keep using lids that may crack.",
+          eth: "The approach is legal, yet it withholds information customers need to protect themselves. Copperline could not easily defend it transparently to the customers affected.",
+          ben: ["Copperline owners", "Retail partners"], risk: ["Customers"],
+          econ: ["Positive", "Sales and margins protected this season."], soc: ["Negative", "Customers carry a risk they cannot see."], env: ["Minimal", "Little effect."],
+          lg: "Legal. No recall is required under current standards.", s: "Strong holiday sales.", l: "If more injuries occur, trust, returns, and legal exposure could grow." },
+        { title: "Pause all shipments", text: "Stop shipping current stock until the new lid is ready in 10 weeks, then restart with the improved design.", trade: "Removes new risk, but misses most of the holidays and leaves current owners uninformed.",
+          tier: "partial", f: { c: 1, b: 0, t: 1 },
+          head: "No new risky units reach customers, but Copperline misses the holiday season and existing owners are still not told.",
+          eth: "Pausing shows concern for safety, but customers who already own the blender remain at risk and uninformed.",
+          ben: ["Future customers"], risk: ["Copperline owners", "Retail partners", "Current blender owners"],
+          econ: ["Negative", "A large loss of holiday revenue and strained retailer relationships."], soc: ["Mixed", "Protects new buyers but not current owners."], env: ["Mixed", "Held stock may later need rework or disposal."],
+          lg: "Legal. Pausing is a business choice, not a legal requirement.", s: "A sharp drop in seasonal sales.", l: "Protects future buyers, but the existing risk is left unresolved." }
+      ],
+      check: { type: "classify",
+        proposal: "<b>Conduct to classify:</b> continuing to sell the blender and replacing lids only for customers who complain, with no public notice, while the product meets current federal safety standards.",
+        q: "How would you classify this conduct?", answer: "LU",
+        fb: "It follows the law, since no recall is required, but it raises concerns about transparency and harm to customers. Legal compliance is not automatically the same as ethical conduct." }
+    },
+    {
+      title: "The Scrap Decision", short: "Waste", tag: "Environmental operations", icon: "bin",
+      objective: "Reduce operating costs at the Milwaukee plant by the end of the year.",
+      situation: "The plant's molding line produces about 40 tons of plastic scrap each year. A recycler currently collects it for a fee. The county landfill would take the same scrap for about 60% less. A regrind machine could let the plant reuse most of the scrap in new parts, but it costs more up front.",
+      stakeholders: ["Surrounding community", "County government", "Copperline owners", "Plant employees", "Recycling company"],
+      pressure: "Plant leaders must show cost savings this year.",
+      concern: "The county landfill is nearing capacity, and the county has asked local businesses to voluntarily reduce what they send.",
+      legal: "Sending plastic scrap to the landfill is legal. The county's request is voluntary.",
+      hShort: "This year's operating costs.", hLong: "Landfill space, material costs, and community relations over many years.",
+      options: [
+        { title: "Landfill the scrap", text: "Switch to the county landfill and record the disposal savings this year.", trade: "Immediate savings, but adds to a landfill the county is trying to protect.",
+          tier: "weak", f: { c: 0, b: 0, t: 0 },
+          head: "Costs drop right away, while 40 tons a year move into a landfill the county is trying to protect.",
+          eth: "The choice is legal, but it ignores a clear community request and treats the waste as someone else's future problem.",
+          ben: ["Copperline owners"], risk: ["Surrounding community", "County government", "Recycling company"],
+          econ: ["Positive", "Immediate disposal savings."], soc: ["Negative", "Community and county relations suffer."], env: ["Negative", "More plastic in a landfill near capacity."],
+          lg: "Legal. The county request is voluntary.", s: "Clear savings this year.", l: "As landfill space runs out, disposal costs may rise for Copperline and its neighbors." },
+        { title: "Reuse the scrap", text: "Buy a regrind machine to reuse most scrap in new parts, capping the reused share and testing parts for strength.", trade: "Higher costs this year; savings arrive in about three years.",
+          tier: "best", f: { c: 1, b: 1, t: 1 },
+          head: "Costs rise this year, but the plant cuts both waste and material purchases over time.",
+          eth: "Copperline balances its cost goal with the community's request, accepting a short-term cost for a long-term benefit.",
+          ben: ["Surrounding community", "Copperline owners (long term)", "Plant employees"], risk: ["Copperline owners (short term)", "Recycling company"],
+          econ: ["Mixed", "Up-front cost now, lower material costs after about three years."], soc: ["Positive", "Supports the county's request and adds skilled machine work."], env: ["Positive", "Less waste and less new plastic."],
+          lg: "Legal.", s: "Misses this year's savings target.", l: "Lower waste and material costs for many years." },
+        { title: "Keep the recycler", text: "Continue paying the recycler and look for savings in other parts of the plant.", trade: "No added environmental harm, but no progress on the cost target from scrap.",
+          tier: "partial", f: { c: 1, b: 0, t: 0 },
+          head: "Environmental impact stays the same, but the plant must find its savings elsewhere.",
+          eth: "This avoids new harm, but it passes up an available option that reduces waste and cost together.",
+          ben: ["Surrounding community", "Recycling company"], risk: ["Copperline owners", "Plant employees (cuts may fall elsewhere)"],
+          econ: ["Negative", "No savings from scrap, so pressure shifts to other costs."], soc: ["Mixed", "Community relations hold, but employees may face cuts elsewhere."], env: ["Positive", "Scrap continues to be recycled."],
+          lg: "Legal.", s: "No change in cost.", l: "A missed chance to lower material use and cost." }
+      ],
+      check: { type: "stake",
+        proposal: "<b>Proposed decision: landfill the scrap.</b> Copperline's owners receive the immediate savings.",
+        q: "Which stakeholder carries the greatest long-term cost from this decision?",
+        opts: ["Copperline's owners", "The surrounding community", "Plant employees", "The recycling company"], answer: 1,
+        fb: "The community shares the landfill. As space runs out, residents and the county face higher disposal costs and fewer options. The recycler loses a customer, but the community carries the larger long-term cost." }
+    },
+    {
+      title: "The Permit Shortcut", short: "Abroad", tag: "International practice", icon: "stamp",
+      objective: "Open Copperline's first sales warehouse in Marevia before the country's main holiday shopping season, eight weeks away.",
+      situation: "Your local partner explains two common practices. Business partners usually exchange gift baskets during the holiday. Warehouse permits take about eight weeks, but inspectors often finish in days if they receive a cash 'processing fee' paid directly to them.",
+      stakeholders: ["Local partner", "Marevian customers", "Copperline owners", "Copperline employees in Marevia", "Marevian public officials"],
+      pressure: "Missing the holiday season would delay first-year revenue by several months.",
+      concern: "Copperline's code allows modest gifts to business partners but prohibits any payment to government officials.",
+      legal: "Marevian law prohibits payments to public officials, though the practice is widely tolerated.",
+      hShort: "Launch timing and first-year sales.", hLong: "Reputation, legal exposure, and standards in a new market.",
+      options: [
+        { title: "One rule everywhere", text: "Decline both the gifts and the fee to keep one simple standard, and open after the eight-week permit process.", trade: "Avoids every risk, but misses the season and may offend partners.",
+          tier: "partial", f: { c: 1, b: 0, t: 1 },
+          head: "Copperline stays clearly within the law, but misses the holiday season and appears dismissive of local business customs.",
+          eth: "Refusing the payment is right, but modest gift exchange is an adaptable practice that Copperline's code already allows.",
+          ben: ["Copperline's reputation"], risk: ["Copperline owners", "Local partner relationship"],
+          econ: ["Negative", "Several months of delayed revenue."], soc: ["Mixed", "Avoids improper payments, but strains the local partnership."], env: ["Minimal", "Little effect."],
+          lg: "Legal.", s: "Missed holiday season.", l: "Clear standards, but a slower start to local relationships." },
+        { title: "Adapt gifts, refuse the fee", text: "Exchange modest, disclosed gifts within the code, refuse the inspector payment, apply through the normal process, and rent a licensed third-party warehouse in the meantime.", trade: "Higher costs for temporary space and a smaller holiday launch.",
+          tier: "best", f: { c: 1, b: 1, t: 1 },
+          head: "Copperline joins the holiday season on a smaller scale while keeping its core standards and respecting local custom.",
+          eth: "Copperline separates an adaptable practice (gift giving) from a core standard it keeps in every market (no payments to officials).",
+          ben: ["Local partner", "Marevian customers", "Copperline owners (long term)"], risk: ["Copperline owners (temporary warehouse cost)"],
+          econ: ["Mixed", "Extra cost for rented space, but some holiday sales."], soc: ["Positive", "Respects local custom and fair dealings with officials."], env: ["Minimal", "Little effect."],
+          lg: "Legal.", s: "A smaller launch and added rental costs.", l: "A trusted reputation and no legal exposure in a new market." },
+        { title: "Follow local custom", text: "Exchange holiday gifts and let the local partner pay the inspector's processing fee so the warehouse opens on time.", trade: "Launches on schedule, but breaks local law and Copperline's code.",
+          tier: "weak", f: { c: 0, b: 0, t: 0 },
+          head: "The warehouse opens on time, but Copperline has paid an official in violation of local law and its own code.",
+          eth: "A common local practice is not automatically legal or ethical. Routing the payment through a partner does not change who benefits from it.",
+          ben: ["Copperline owners (short term)", "Local partner"], risk: ["Copperline owners", "Copperline employees in Marevia", "Marevian customers"],
+          econ: ["Positive", "On-time launch and holiday sales."], soc: ["Negative", "Supports a practice that undermines fair treatment by officials."], env: ["Minimal", "Little effect."],
+          lg: "Illegal under Marevian law and prohibited by Copperline's code.", s: "Holiday sales on schedule.", l: "Legal penalties, reputational damage, and pressure to pay again in the future." }
+      ],
+      check: { type: "classify",
+        proposal: "<b>Conduct to classify:</b> paying an inspector's cash 'processing fee' that Marevian law prohibits but that is common and widely tolerated locally.",
+        q: "How would you classify this conduct?", answer: "IS",
+        fb: "The payment breaks local law even though it is tolerated in practice, which makes it Illegal but Socially Accepted. Being tolerated does not make it acceptable for Copperline, whose code prohibits it." }
+    }
+  ];
+
+  /* ============ State ============ */
+  var S;
+  function reset() { S = { view: 0, sel: null, locked: false, chk: null, chkLocked: false, picks: [null, null, null, null], checks: [null, null, null, null] }; }
+  var app = document.getElementById("app");
+  function say(t) { document.getElementById("live").textContent = t; }
+
+  /* ============ Deck ============ */
+  function renderDeck() {
+    var items = [["Start", "Briefing", "flag"]].concat(CASES.map(function (c, i) { return ["Case " + (i + 1), c.short, c.icon]; })).concat([["Finish", "Summary", "star"]]);
+    document.getElementById("deck").innerHTML = items.map(function (it, i) {
+      var cls = i < S.view ? "done" : (i === S.view ? "now" : "");
+      return '<li class="dk ' + cls + '"' + (i === S.view ? ' aria-current="step"' : '') + '><span class="di">' + ic(i < S.view ? "check" : it[2]) + '</span><span><small>' + it[0] + '</small><b>' + it[1] + '</b></span></li>';
+    }).join("");
+  }
+
+  /* ============ Intro ============ */
+  function renderIntro() {
+    var dl = Object.keys(DIMS).map(function (k) { var d = DIMS[k]; return '<span class="dl" style="background:' + d[3] + ';color:' + d[2] + '">' + ic(d[1]) + d[0] + '</span>'; }).join("");
+    app.innerHTML =
+      '<div class="stack">' +
+        '<section class="band hero">' +
+          '<div class="eb">Section 2 &middot; Ethics and Business Responsibility</div>' +
+          '<h1 tabindex="-1" id="screenTitle">Business Ethics <span class="mark">Decision</span> Simulator</h1>' +
+          '<p>Four ordinary business situations. Each choice carries real trade-offs. Decide, see the consequences, and check how you read the stakeholders and the law.</p>' +
+        '</section>' +
+        '<div class="intro-grid">' +
+          '<section class="card">' +
+            '<div class="eyebrow">Your company</div>' +
+            '<div class="co"><span class="logo">' + ic("kettle") + '</span><span><b>Copperline</b><small>Milwaukee, Wisconsin</small></span></div>' +
+            '<p style="color:var(--ink-2)">Copperline designs and makes small kitchen appliances, such as kettles and blenders, sold through national retailers and online. It has about 600 employees and one manufacturing plant.</p>' +
+            '<div class="role"><b>Your role:</b> operations manager. Sourcing, product, plant, and new-market decisions all reach your desk this quarter.</div>' +
+            '<div class="preview">' + CASES.map(function (c, i) {
+              return '<div class="pv"><span class="pi">' + ic(c.icon) + '</span><span><b>' + c.title + '</b><span>Case ' + (i + 1) + ' &middot; ' + c.tag + '</span></span></div>';
+            }).join("") + '</div>' +
+          '</section>' +
+          '<section class="card">' +
+            '<div class="eyebrow">Before each decision, ask</div>' +
+            '<ol class="qs">' +
+              '<li>What is the actual business decision?</li>' +
+              '<li>Who is affected?</li>' +
+              '<li>What benefits, risks, and costs does each stakeholder experience?</li>' +
+              '<li>What does the law require?</li>' +
+              '<li>What do organizational ethical standards require?</li>' +
+              '<li>What are the short-term and long-term consequences?</li>' +
+              '<li>Could the business explain and defend the decision transparently?</li>' +
+            '</ol>' +
+            '<div class="dims-legend">' + dl + '</div>' +
+          '</section>' +
+        '</div>' +
+        '<section class="card"><div class="row"><span class="hint">4 cases &middot; about 10 minutes &middot; ungraded &middot; one attempt per decision, then the story moves on</span>' +
+          '<button class="btn btn-main" id="startBtn" type="button"><span class="bt">Open Case 1</span><span class="bx">' + ic("arrow") + '</span></button></div></section>' +
+      '</div>';
+    document.getElementById("startBtn").addEventListener("click", function () { go(1); });
+  }
+
+  /* ============ Case ============ */
+  function chips(list) { return '<div class="shchips">' + list.map(function (s) { return '<span class="shc">' + s + '</span>'; }).join("") + '</div>'; }
+
+  function setSteps(n) {
+    var el = document.getElementById("steps");
+    if (!el) return;
+    Array.prototype.forEach.call(el.children, function (c, i) { c.className = "st" + (i < n ? " ok" : (i === n ? " on" : "")); });
+  }
+
+  function renderCase() {
+    var ci = S.view - 1, C = CASES[ci];
+    var checkName = C.check.type === "stake" ? "Stakeholder check" : "Classify conduct";
+    var opts = C.options.map(function (o, i) {
+      return '<button type="button" class="opt" role="radio" aria-checked="false" data-i="' + i + '" tabindex="' + (i === 0 ? 0 : -1) + '">' +
+        '<span class="tierflag tf-' + o.tier + '">' + TIER[o.tier].flag + '</span>' +
+        '<span class="radio" aria-hidden="true"></span>' +
+        '<span class="ol"><span>' + "ABC".charAt(i) + '</span></span>' +
+        '<h4>' + o.title + '</h4><p>' + o.text + '</p>' +
+        '<span class="to">' + ic("scale") + '<span><strong>Trade-off:</strong> ' + o.trade + '</span></span>' +
+      '</button>';
+    }).join("");
+
+    app.innerHTML =
+      '<div class="stack">' +
+        '<section class="band case-band">' +
+          '<div class="tagline"><span class="chipw">Case ' + (ci + 1) + ' of 4</span><span class="chipw">' + C.tag + '</span></div>' +
+          '<h2 tabindex="-1" id="screenTitle">' + C.title + '</h2>' +
+          '<div class="objective"><span class="oi">' + ic("flag") + '</span><span><small>Business objective</small><b>' + C.objective + '</b></span></div>' +
+          '<div class="steps" id="steps"><span class="st on">1 Situation</span><span class="st">2 Decide</span><span class="st">3 Analyze</span><span class="st">4 ' + checkName + '</span></div>' +
+        '</section>' +
+        '<section class="card">' +
+          '<div class="sheet">' +
+            '<div class="sf wide"><h4>' + ic(C.icon) + 'Situation</h4><p>' + C.situation + '</p></div>' +
+            '<div class="sf wide"><h4>' + ic("people") + 'Stakeholders</h4>' + chips(C.stakeholders) + '</div>' +
+            '<div class="sf"><h4>' + ic("alert") + 'Pressure</h4><p>' + C.pressure + '</p></div>' +
+            '<div class="sf"><h4>' + ic("eye") + 'Ethical concern</h4><p>' + C.concern + '</p></div>' +
+            '<div class="sf"><h4>' + ic("scale") + 'Legal context</h4><p>' + C.legal + '</p></div>' +
+            '<div class="sf"><h4>' + ic("hourglass") + 'Time horizon</h4><div class="horizon"><div class="hz"><b>Short term</b>' + C.hShort + '</div><div class="hz"><b>Long term</b>' + C.hLong + '</div></div></div>' +
+          '</div>' +
+        '</section>' +
+        '<section class="card" id="decide">' +
+          '<p class="qline" id="qDec">What do you decide?</p>' +
+          '<p class="hint">Every option has consequences. Choose the one you would put in place.</p>' +
+          '<div class="opts" id="opts" role="radiogroup" aria-labelledby="qDec">' + opts + '</div>' +
+          '<div class="row" style="margin-top:16px"><span class="hint" id="dHint">One attempt. Your decision is recorded when you confirm.</span>' +
+          '<button class="btn btn-main" id="decBtn" type="button" disabled><span class="bt">Confirm decision</span><span class="bx">' + ic("check") + '</span></button></div>' +
+        '</section>' +
+        '<div id="reportSlot"></div>' +
+        '<div id="checkSlot"></div>' +
+      '</div>';
+
+    var ob = app.querySelectorAll(".opt");
+    Array.prototype.forEach.call(ob, function (b, idx) {
+      b.addEventListener("click", function () { pickOpt(idx); });
+      b.addEventListener("keydown", function (e) {
+        var n = arrowNext(e, idx, ob.length);
+        if (n !== null && !S.locked) { e.preventDefault(); pickOpt(n); ob[n].focus(); }
+      });
+    });
+    document.getElementById("decBtn").addEventListener("click", confirmDecision);
+  }
+
+  function arrowNext(e, idx, len) {
+    if (e.key === "ArrowDown" || e.key === "ArrowRight") return (idx + 1) % len;
+    if (e.key === "ArrowUp" || e.key === "ArrowLeft") return (idx - 1 + len) % len;
+    return null;
+  }
+
+  function pickOpt(i) {
+    if (S.locked) return;
+    S.sel = i;
+    Array.prototype.forEach.call(app.querySelectorAll(".opt"), function (b, j) {
+      b.setAttribute("aria-checked", j === i ? "true" : "false");
+      b.setAttribute("tabindex", j === i ? "0" : "-1");
+    });
+    document.getElementById("decBtn").disabled = false;
+    setSteps(1);
+  }
+
+  function confirmDecision() {
+    if (S.locked || S.sel === null) return;
+    var ci = S.view - 1, C = CASES[ci], o = C.options[S.sel];
+    S.locked = true;
+    S.picks[ci] = S.sel;
+    var wrap = document.getElementById("opts");
+    wrap.classList.add("locked");
+    Array.prototype.forEach.call(wrap.querySelectorAll(".opt"), function (b, j) {
+      b.disabled = true;
+      if (j === S.sel) b.classList.add("picked");
+    });
+    var db = document.getElementById("decBtn"); db.parentNode.removeChild(db);
+    document.getElementById("dHint").textContent = o.tier === "best" ? "Decision recorded as the strongest option." : "Decision recorded as not the strongest option.";
+    setSteps(2);
+
+    var dims = ["econ", "soc", "env"].map(function (k) {
+      var d = DIMS[k], v = o[k];
+      return '<div class="dim" style="--dc:' + d[2] + ';--dt:' + d[3] + '"><div class="dh"><span>' + ic(d[1]) + '</span><b>' + d[0] + '</b><em class="rate r-' + v[0] + '">' + v[0] + '</em></div><p>' + v[1] + '</p></div>';
+    }).join("");
+
+    var bestIdx = 0; C.options.forEach(function (x, j) { if (x.tier === "best") bestIdx = j; });
+    var others = C.options.map(function (x, j) {
+      if (j === S.sel) return "";
+      var cls = { best: "e-best", partial: "e-partial", weak: "e-weak" }[x.tier];
+      return '<div><strong>Option ' + "ABC".charAt(j) + ': ' + x.title + '</strong><em class="' + cls + '">' + TIER[x.tier].label + '</em><br>' + x.head + '</div>';
+    }).join("");
+
+    document.getElementById("reportSlot").innerHTML =
+      '<section class="report" aria-labelledby="rpTitle">' +
+        '<div class="rp-top rp-' + o.tier + '"><span class="ri">' + ic(TIER[o.tier].icon) + '</span><div><small>Consequence report &middot; ' + TIER[o.tier].label + (o.tier === "best" ? "" : " &middot; recorded as incorrect") + '</small><h3 tabindex="-1" id="rpTitle">' + o.head + '</h3></div></div>' +
+        '<div class="rp-body">' +
+          '<div class="sec"><h4>' + ic("eye") + 'Ethical implications</h4><p>' + o.eth + '</p></div>' +
+          '<div class="sec"><h4>' + ic("people") + 'Stakeholder effects</h4><div class="who">' +
+            '<div class="wcol w-ben"><b>' + ic("check") + 'Receives the benefits</b>' + chips(o.ben) + '</div>' +
+            '<div class="wcol w-risk"><b>' + ic("alert") + 'Carries the risks or costs</b>' + chips(o.risk) + '</div>' +
+          '</div></div>' +
+          '<div class="sec"><h4>' + ic("scale") + 'Economic, social, and environmental effects</h4><div class="dims">' + dims + '</div></div>' +
+          '<div class="legal">' + ic("scale") + '<p><b>Legal considerations:</b> ' + o.lg + '</p></div>' +
+          '<div class="sec"><h4>' + ic("hourglass") + 'Short term and long term</h4><div class="timeline"><div class="tl"><b>Short term</b><p>' + o.s + '</p></div><div class="tl-arrow" aria-hidden="true">' + ic("arrow") + '</div><div class="tl"><b>Long term</b><p>' + o.l + '</p></div></div></div>' +
+          (o.tier === "best" ? "" : '<div class="best-note">The strongest option was <b>Option ' + "ABC".charAt(bestIdx) + ': ' + C.options[bestIdx].title + '</b>. ' + C.options[bestIdx].eth + '</div>') +
+          '<details class="compare"><summary>' + ic("chev") + 'Compare how the other options would play out</summary><div class="cmp">' + others + '</div></details>' +
+          '<div class="row"><span class="hint">Next, test your analysis.</span><button class="btn btn-main" id="toCheck" type="button"><span class="bt">' + (C.check.type === "stake" ? "Stakeholder check" : "Classify the conduct") + '</span><span class="bx">' + ic("arrow") + '</span></button></div>' +
+        '</div>' +
+      '</section>';
+    document.getElementById("toCheck").addEventListener("click", function () {
+      this.parentNode.parentNode.removeChild(this.parentNode);
+      renderCheck();
+    });
+    var slot = document.getElementById("reportSlot"), t = document.getElementById("rpTitle");
+    try { slot.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (e) { slot.scrollIntoView(); }
+    try { t.focus({ preventScroll: true }); } catch (e2) { t.focus(); }
+    say("Decision recorded. Consequence report shown.");
+  }
+
+  function renderCheck() {
+    var ci = S.view - 1, C = CASES[ci], k = C.check;
+    S.chk = null; S.chkLocked = false;
+    setSteps(3);
+    var body;
+    if (k.type === "stake") {
+      body = '<div class="sk-grid" id="cset" role="radiogroup" aria-labelledby="cq">' + k.opts.map(function (s, i) {
+        return '<button type="button" class="sk" role="radio" aria-checked="false" data-v="' + i + '" tabindex="' + (i === 0 ? 0 : -1) + '"><span class="ski">' + ic("person") + '</span>' + s + '</button>';
+      }).join("") + '</div>';
+    } else {
+      var q = function (key) { return '<button type="button" class="q" role="radio" aria-checked="false" data-v="' + key + '"><b>' + CLASSES[key][0] + '</b><span>' + CLASSES[key][1] + '</span></button>'; };
+      body = '<div class="matrix" id="cset" role="radiogroup" aria-labelledby="cq">' +
+        '<span></span><span class="ax" aria-hidden="true">Ethical or accepted</span><span class="ax" aria-hidden="true">Unethical</span>' +
+        '<span class="ax v" aria-hidden="true">Legal</span>' + q("LE") + q("LU") +
+        '<span class="ax v" aria-hidden="true">Illegal</span>' + q("IS") + q("IU") +
+      '</div>';
+    }
+    document.getElementById("checkSlot").innerHTML =
+      '<section class="card" style="animation:rise .35s ease">' +
+        '<div class="check-head"><span>' + ic(k.type === "stake" ? "people" : "scale") + '</span><div><div class="eyebrow">' + (k.type === "stake" ? "Stakeholder check" : "Classify the conduct") + '</div><p class="qline" id="cq" tabindex="-1" style="margin:0">' + k.q + '</p></div></div>' +
+        '<div class="proposal">' + k.proposal + '</div>' +
+        body +
+        '<div id="cfb"></div>' +
+        '<div class="row" style="margin-top:16px"><span class="hint" id="cHint">One attempt. Your answer is recorded when you lock it in.</span>' +
+        '<button class="btn btn-main" id="cBtn" type="button" disabled><span class="bt">Lock in answer</span><span class="bx">' + ic("check") + '</span></button></div>' +
+      '</section>';
+
+    var bs = document.querySelectorAll("#cset button");
+    Array.prototype.forEach.call(bs, function (b, idx) {
+      if (k.type !== "stake") b.setAttribute("tabindex", idx === 0 ? "0" : "-1");
+      b.addEventListener("click", function () { pickCheck(b.getAttribute("data-v")); });
+      b.addEventListener("keydown", function (e) {
+        var n = arrowNext(e, idx, bs.length);
+        if (n !== null && !S.chkLocked) { e.preventDefault(); pickCheck(bs[n].getAttribute("data-v")); bs[n].focus(); }
+      });
+    });
+    document.getElementById("cBtn").addEventListener("click", function () {
+      if (!S.chkLocked) lockCheck(); else go(S.view + 1);
+    });
+    var slot = document.getElementById("checkSlot"), t = document.getElementById("cq");
+    try { slot.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (e) { slot.scrollIntoView(); }
+    try { t.focus({ preventScroll: true }); } catch (e2) { t.focus(); }
+  }
+
+  function pickCheck(v) {
+    if (S.chkLocked) return;
+    S.chk = v;
+    Array.prototype.forEach.call(document.querySelectorAll("#cset button"), function (b) {
+      var on = b.getAttribute("data-v") === v;
+      b.setAttribute("aria-checked", on ? "true" : "false");
+      b.setAttribute("tabindex", on ? "0" : "-1");
+    });
+    document.getElementById("cBtn").disabled = false;
+  }
+
+  function lockCheck() {
+    if (S.chk === null) return;
+    var ci = S.view - 1, k = CASES[ci].check;
+    var answer = k.type === "stake" ? String(k.answer) : k.answer;
+    var ok = S.chk === answer;
+    S.chkLocked = true;
+    S.checks[ci] = ok;
+    var set = document.getElementById("cset");
+    set.classList.add("locked-set");
+    Array.prototype.forEach.call(set.querySelectorAll("button"), function (b) {
+      b.disabled = true;
+      var v = b.getAttribute("data-v");
+      if (v === answer) b.classList.add("is-right");
+      else if (v === S.chk) b.classList.add("is-wrong");
+    });
+    var right = k.type === "stake" ? k.opts[k.answer] : CLASSES[k.answer][0];
+    document.getElementById("cfb").innerHTML =
+      '<div class="cfb ' + (ok ? "y" : "n") + '" role="status"><b>' + ic(ok ? "check" : "cross") + (ok ? "Accurate" : "Recorded as incorrect &middot; the answer is " + right) + '</b><p>' + k.fb + '</p></div>';
+    setSteps(4);
+    var btn = document.getElementById("cBtn");
+    btn.innerHTML = '<span class="bt">' + (S.view < 4 ? "Open Case " + (S.view + 1) : "See your summary") + '</span><span class="bx">' + ic("arrow") + '</span>';
+    document.getElementById("cHint").textContent = "Answer recorded.";
+    say(ok ? "Accurate answer recorded." : "Answer recorded as incorrect.");
+  }
+
+  /* ============ Results ============ */
+  function renderResults() {
+    var flagSum = { c: 0, b: 0, t: 0 };
+    S.picks.forEach(function (p, i) { var f = CASES[i].options[p].f; flagSum.c += f.c; flagSum.b += f.b; flagSum.t += f.t; });
+    var legal = (S.checks[1] ? 1 : 0) + (S.checks[3] ? 1 : 0);
+    var stake = (S.checks[0] ? 1 : 0) + (S.checks[2] ? 1 : 0);
+    var SK = [
+      { n: "Recognizing ethical concerns", v: flagSum.c, t: 4,
+        good: "You consistently noticed when a legal or profitable option still conflicted with standards or harmed stakeholders.",
+        rev: "Morals, ethics, and social responsibility: a decision can be legal and profitable yet still conflict with organizational standards or stakeholder expectations." },
+      { n: "Distinguishing ethics from legality", v: legal, t: 2,
+        good: "You separated what the law requires from what ethical standards require.",
+        rev: "The four classifications: legal compliance is not automatically ethical conduct, and a tolerated practice can still be illegal." },
+      { n: "Identifying stakeholder consequences", v: stake, t: 2,
+        good: "You identified who carries the risks or costs, not only who benefits.",
+        rev: "Stakeholder responsibility: ask who is affected, who benefits, and who carries the risks or costs." },
+      { n: "Balancing economic, social, and environmental considerations", v: flagSum.b, t: 4,
+        good: "Your decisions weighed costs against effects on people and the environment.",
+        rev: "The three dimensions of responsibility and how they can conflict. Responsible decisions often involve real trade-offs." },
+      { n: "Recognizing short-term and long-term consequences", v: flagSum.t, t: 4,
+        good: "You looked past immediate results to longer-term effects on trust, costs, and the community.",
+        rev: "Sustainability: consider whether current practices create significant future costs or harm." }
+    ];
+    var well = [], review = [];
+    var rows = SK.map(function (s) {
+      var ok = s.v / s.t >= 0.75;
+      (ok ? well : review).push(s);
+      var dots = "";
+      for (var i = 0; i < s.t; i++) dots += '<span class="dot' + (i < s.v ? " on" : "") + '"></span>';
+      return '<div class="pf"><b>' + s.n + '</b><span class="dots" role="img" aria-label="' + s.v + ' of ' + s.t + '">' + dots + '</span><span class="pfs ' + (ok ? "y" : "n") + '">' + (ok ? "Handled well" : "Review") + '</span></div>';
+    }).join("");
+    var bestCount = 0; S.picks.forEach(function (p, i) { if (CASES[i].options[p].tier === "best") bestCount++; });
+
+    var recap = CASES.map(function (c, i) {
+      var o = c.options[S.picks[i]], cls = { best: "e-best", partial: "e-partial", weak: "e-weak" }[o.tier];
+      return '<div class="rc"><small>Case ' + (i + 1) + ' &middot; ' + c.short + '</small><b>' + o.title + '</b><em class="' + cls + '">' + TIER[o.tier].label + '</em></div>';
+    }).join("");
+
+    app.innerHTML =
+      '<div class="stack">' +
+        '<section class="band hero">' +
+          '<div class="eb">Copperline &middot; Quarter closed</div>' +
+          '<h1 tabindex="-1" id="screenTitle">Your <span class="mark">Decision</span> Record</h1>' +
+          '<p>You chose the most balanced option in ' + bestCount + ' of 4 cases. Here is how your choices reflect the Section 2 concepts.</p>' +
+        '</section>' +
+        '<section class="card"><div class="eyebrow" style="margin-bottom:12px">Performance summary</div><div class="perf">' + rows + '</div></section>' +
+        '<div class="twocol">' +
+          '<section class="lst l-good"><h3>' + ic("star") + 'Handled well</h3><ul>' + (well.length ? well.map(function (s) { return '<li><b>' + s.n + '</b>' + s.good + '</li>'; }).join("") : '<li>Replay the cases to build strength in these areas.</li>') + '</ul></section>' +
+          '<section class="lst l-rev"><h3>' + ic("book") + 'Concepts to review</h3><ul>' + (review.length ? review.map(function (s) { return '<li><b>' + s.n + '</b>' + s.rev + '</li>'; }).join("") : '<li>No gaps in this run. Try different options to compare their consequences.</li>') + '</ul></section>' +
+        '</div>' +
+        '<section class="card"><div class="eyebrow" style="margin-bottom:12px">Your decisions</div><div class="rec">' + recap + '</div>' +
+          '<div class="row" style="margin-top:18px"><span class="hint">Restart to explore how other choices change the consequences.</span>' +
+          '<button class="btn btn-ghost" id="again" type="button"><span class="bt">Restart activity</span><span class="bx">' + ic("restart") + '</span></button></div>' +
+        '</section>' +
+      '</div>';
+    document.getElementById("again").addEventListener("click", function () { reset(); go(0); });
+  }
+
+  /* ============ Navigation ============ */
+  function go(v) {
+    S.view = v; S.sel = null; S.locked = false; S.chk = null; S.chkLocked = false;
+    renderDeck();
+    if (v === 0) renderIntro();
+    else if (v === 5) renderResults();
+    else renderCase();
+    try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) { window.scrollTo(0, 0); }
+    var t = document.getElementById("screenTitle");
+    if (t && v !== 0) { try { t.focus({ preventScroll: true }); } catch (e2) { t.focus(); } }
+  }
+
+  reset();
+  go(0);
+})();
+</script>
+</body>
+</html>
